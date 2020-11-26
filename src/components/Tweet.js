@@ -1,4 +1,4 @@
-import { dbService } from "myBase";
+import { dbService, storageService } from "myBase";
 import React, { useState } from "react";
 const Tweet = ({ tweetObj, isOwner }) => {
   const [edting, setEditing] = useState(false);
@@ -8,14 +8,15 @@ const Tweet = ({ tweetObj, isOwner }) => {
     const ok = window.confirm("Are u sure you want to delete this tweet?");
     if (ok) {
       //delete tweet
-      await dbService.doc(`tweet/${tweetObj.id}`).delete();
+      await dbService.doc(`tweets/${tweetObj.id}`).delete();
+      await storageService.refFromURL(tweetObj.attachmentURL).delete()
     }
   };
 
   const onToggleEditing = () => setEditing((prev) => !prev);
   const onSubmit = async (e) => {
     e.preventDefault();
-    await dbService.doc(`tweet/${tweetObj.id}`).update({
+    await dbService.doc(`tweets/${tweetObj.id}`).update({
       text: newTweet,
     });
     setEditing(false);
@@ -47,6 +48,7 @@ const Tweet = ({ tweetObj, isOwner }) => {
       ) : (
         <>
           <h4>{tweetObj.text}</h4>
+          {tweetObj.attachmentURL && <img src={tweetObj.attachmentURL} width='100px' height='100px' alt='attachment' />}
           {isOwner && (
             <>
               <button onClick={onDeleteClick}>DELETE</button>
